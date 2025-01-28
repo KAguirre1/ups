@@ -1,6 +1,8 @@
 package com.example.ups.poo.service;
 
 import com.example.ups.poo.dto.Person;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -24,5 +26,14 @@ public class PersonService {
             personList.add(p2);
 
             return personList;
-    }
+        }
+
+        public ResponseEntity getPersonById(String id) {
+            for (Person person: personList) {
+                if (id.equalsIgnoreCase(person.getId())) {
+                    return ResponseEntity.status(HttpStatus.OK).body(person);
+                }
+            }
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Person with id: "+ id + " not found");
+        }
 }
