@@ -52,4 +52,16 @@ public class PersonService {
         personList.add(person);
         return ResponseEntity.status(HttpStatus.OK).body("Person successfully register");
     }
+
+    public  ResponseEntity updatePerson(Person person) {
+        for (Person per : personList) {
+            if (person.getId().equalsIgnoreCase(per.getId())) {
+                per.setName(person.getName());
+                per.setLastname(person.getLastname());
+                per.setAge(person.getAge());
+                return ResponseEntity.status(HttpStatus.OK).body("Person with Id :" + person.getId() + " was successfully");
+            }
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Person with Id: " + person.getId() + " not found");
+    }
 }
