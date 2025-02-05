@@ -19,6 +19,20 @@ public class PersonService {
         this.personRepository = personRepository;
     }
 
+    public List<PersonDTO> fetchAllPeopleRecords() {
+        Iterable<Person> personIterable = personRepository.findAll();
+        List<PersonDTO> personDTOList = new ArrayList<>();
+
+        for (Person per : personIterable) {
+            PersonDTO personDTO = new PersonDTO();
+            personDTO.setName(per.getName() + " " + per.getLastname());
+            personDTO.setAge(per.getAge());
+            personDTO.setId(per.getPersonId());
+            personDTOList.add(personDTO);
+        }
+        return personDTOList;
+    }
+
     public ResponseEntity getAllPeople() {
         Iterable<Person> personIterable = personRepository.findAll();
         List<PersonDTO> personDTOList = new ArrayList<>();
@@ -37,16 +51,17 @@ public class PersonService {
         return ResponseEntity.status(HttpStatus.OK).body(personDTOList);
     }
 
-//    public ResponseEntity getPersonById(String id) {
-//        for (PersonDTO personDTO : personDTOList) {
-//            if (id.equalsIgnoreCase(personDTO.getId())) {
-//                return ResponseEntity.status(HttpStatus.OK).body(personDTO);
-//            }
-//        }
-//        //String message = "Person with id: " + id + " not found";
-//        //return ResponseEntity.status(Http.Status.NOT_FOUND).body()
-//        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Person with id: " + id + " not found");
-//    }
+    public ResponseEntity getPersonById(String id) {
+        List<PersonDTO> personDTOList = fetchAllPeopleRecords();
+        for (PersonDTO personDTO : personDTOList) {
+            if (id.equalsIgnoreCase(personDTO.getId())) {
+                return ResponseEntity.status(HttpStatus.OK).body(personDTO);
+            }
+        }
+        //String message = "Person with id: " + id + " not found";
+        //return ResponseEntity.status(Http.Status.NOT_FOUND).body()
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Person with id: " + id + " not found");
+    }
 //
 //    public ResponseEntity createPerson(PersonDTO personDTO) {
 //        if (personDTO.getId() == null || personDTO.getId().isBlank()) {
@@ -99,5 +114,5 @@ public class PersonService {
 //            }
 //        }
 //        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Person with id: " + id + " was not found");
-//    }
+    }
 }
