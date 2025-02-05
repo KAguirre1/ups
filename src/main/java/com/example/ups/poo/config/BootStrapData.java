@@ -32,7 +32,7 @@ public class BootStrapData implements CommandLineRunner {
         personRepository.save(p1);
         personRepository.save(p2);
 
-        System.out.println("--- Sarted BootStrapData ---");
-        System.out.println("");
+        System.out.println("--- Started BootStrapData ---");
+        System.out.println("Number of person: " + personRepository.count());
     }
 }
