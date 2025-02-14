@@ -42,7 +42,6 @@ public class PersonService {
     private List<PersonDTO> fetchAllPeopleRecords() {
         Iterable<Person> personIterable = personRepository.findAll();
         List<PersonDTO> personDTOList = new ArrayList<>();
-
         for (Person per : personIterable) {
             PersonDTO personDTO = mapPersonToPersonDTO(per);
             personDTOList.add(personDTO);
@@ -72,16 +71,13 @@ public class PersonService {
     public ResponseEntity createPerson(PersonDTO personDTO) {
         if (personDTO.getId() == null || personDTO.getId().isBlank()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Person Id is required");
-        } if (personDTO.getId().length() != 10) {
+        } else if (personDTO.getId().length() != 10) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Person Id must be 10 digits");
-        }
-        if (personDTO.getName() == null || personDTO.getName().isBlank()) {
+        } else if (personDTO.getName() == null || personDTO.getName().isBlank()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Person Name is required");
-        }
-        if (personDTO.getName().split(" ").length == 1) {
+        } else if (personDTO.getName().split(" ").length == 1) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("The full Name is required");
-        }
-        if (personDTO.getAge() <= 0) {
+        } else if (personDTO.getAge() <= 0) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Person Age is required");
         }
         Optional<Person> personOptional = personRepository.findByPersonId(personDTO.getId());
@@ -96,29 +92,32 @@ public class PersonService {
 
     public ResponseEntity updatePerson(PersonDTO personDTO) {
         Optional<Person> personOptional = personRepository.findByPersonId(personDTO.getId());
-        if (personOptional.isPresent()) {
-            Person per = personOptional.get();
-            if (personDTO.getName() == null && personDTO.getAge() == 0) {
-                return ResponseEntity.status(HttpStatus.OK).body("No changes made for person with Id: " + personDTO.getId());
-            }
-            if (personDTO.getName() != null && !personDTO.getName().isBlank()) {
-                String fullName = personDTO.getName();
-                if (fullName.contains(" ")) {
-                    String[] fullNameArray = fullName.split(" ");
-                    per.setName(fullNameArray[0]);
-                    per.setLastname(fullNameArray[1]);
+        if (!personOptional.isPresent()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Person with Id: " + personDTO.getId() + " not found");
+        }
+        Person per = personOptional.get();
+        if (personDTO.getName() == null && personDTO.getAge() == 0) {
+            return ResponseEntity.status(HttpStatus.OK).body("No changes made for person with Id: " + personDTO.getId());
+        }
+        if (personDTO.getName() != null && !personDTO.getName().trim().isEmpty()) {
+            String fullName = personDTO.getName();
+            if (fullName.contains(" ")) {
+                String[] fullNameArray = fullName.split(" ");
+                per.setName(fullNameArray[0]);
+                per.setLastname(fullNameArray[1]);
             } else {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Both fist and last names are required");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Both first and last names are required");
             }
+        } else if (personDTO.getName() != null && personDTO.getName().trim().isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Both first and last names are required");
         }
-            if (personDTO.getAge() <= 0) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Age can not be negative or than less 0");
-            }
+        if (personDTO.getAge() > 0) {
             per.setAge(personDTO.getAge());
-            personRepository.save(per);
-            return ResponseEntity.status(HttpStatus.OK).body("Person with Id :" + personDTO.getId() + " was successfully");
+        } else if (personDTO.getAge() < 0) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Age cannot be negative");
         }
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Person with Id: " + personDTO.getId() + " not found");
+        personRepository.save(per);
+        return ResponseEntity.status(HttpStatus.OK).body("Person with Id: " + personDTO.getId() + " was successfully updated");
     }
 
     public ResponseEntity deletePersonById(String id) {
